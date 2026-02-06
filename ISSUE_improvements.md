@@ -1,33 +1,27 @@
-# Issue: Possible improvements to the project (ML/DS)
+# Issue: Возможные улучшения проекта (ML/DS)
 
-**Title:** Possible improvements to the project (ML/DS)
+**Title:** Возможные улучшения проекта (ML/DS)
 
-**Body (copy into GitHub Issues):**
+**Body:**
 
----
+## Возможные улучшения (ML/DS)
 
-## Possible improvements (ML/DS)
+### 1. Модели
+- Добавить ансамбли: `RandomForestClassifier`, `GradientBoostingClassifier` или XGBoost/LightGBM; для табличных данных часто дают лучший F1/ROC-AUC, интерпретируемы через SHAP (TreeExplainer)
+- Калибровка вероятностей: `CalibratedClassifierCV` для лучшей модели — надёжнее пороги для сегментации
 
-Proposals for improving the retail retention classification pipeline from an ML/DS perspective:
+### 2. Гиперпараметры
+- В GridSearch: `class_weight='balanced'` (или сетка по весам) для LogisticRegression/SVC при дисбалансе; расширить сетку KNN (`n_neighbors` 5–25, `metric`: minkowski, manhattan)
+- Кросс-валидация: стратифицированный K-fold с большим числом фолдов (7–10) или repeated CV для стабильных оценок F1 и ROC-AUC
 
-### 1. Models
-- **Add ensemble models:** e.g. `RandomForestClassifier`, `GradientBoostingClassifier` or `XGBoost`/`LightGBM` to the comparison; they often give better F1/ROC-AUC on tabular data and can be explained via SHAP (TreeExplainer).
-- **Try calibration:** add `CalibratedClassifierCV` for the best model to improve reliability of predicted probabilities (e.g. for segment thresholds and business decisions).
+### 3. Метрики
+- Добавить precision-recall кривую и AUC-PR (важно при дисбалансе)
+- Подбор порога решения по F1 вместо 0.5; зафиксировать выбранный порог для сегментации
 
-### 2. Hyperparameters and tuning
-- **Extend GridSearchCV:** add `class_weight='balanced'` (or grid over class weights) for LogisticRegression/SVC to better handle class imbalance; tune `n_neighbors` for KNN (e.g. 5–25) and add `metric` (e.g. `minkowski`, `manhattan`).
-- **Cross-validation:** consider stratified K-fold with more folds (e.g. 7–10) or repeated CV to get more stable estimates of F1 and ROC-AUC.
+### 4. Признаки
+- Фичи из `market_money` и `market_time`: тренд, дисперсия, реценность по периодам; при нелинейности — бининг или полиномиальные признаки
+- Отбор признаков: RFE или L1 после препроцессинга; пересчитать SHAP на сокращённом наборе
 
-### 3. Metrics and evaluation
-- **Additional metrics:** report precision-recall curve and AUC-PR (especially useful for imbalanced target); add macro/weighted F1 if multi-class is introduced later.
-- **Threshold tuning:** optimize decision threshold for the chosen metric (e.g. F1) instead of using 0.5, and document the chosen threshold for segmentation.
-
-### 4. Features and preprocessing
-- **Feature engineering:** add aggregates from `market_money` and `market_time` (e.g. trend, variance, recency) as explicit features; consider binning or polynomial features for key numerical variables if EDA suggests non-linearity.
-- **Feature selection:** run recursive feature elimination (RFE) or L1-based selection after preprocessing to reduce overfitting and simplify the model; re-evaluate SHAP on the reduced set.
-
-### 5. Data and validation
-- **Stratification and splits:** ensure stratification by target (and optionally by segment) in train/val/test; consider time-based split if “период” has a time component to avoid leakage.
-- **Resampling:** experiment with SMOTE or undersampling on the training set only, then re-tune and compare F1/ROC-AUC with the current pipeline.
-
-These changes would strengthen the modeling process and make the project easier to extend and maintain.
+### 5. Данные и валидация
+- Стратификация по целевой переменной в train/val/test; при наличии времени в «период» — временной сплит, чтобы избежать утечки
+- SMOTE или undersampling только на обучающей выборке; переобучить и сравнить F1/ROC-AUC с текущим пайплайном
