@@ -61,7 +61,3 @@ Data files (`market_file.csv`, `market_money.csv`, `market_time.csv`, `money.csv
 
 - Best model: **F1-score ≥ 0.7**, **ROC-AUC ≥ 0.8**
 - Segments with clear, actionable retention offers
-
-## License
-
-MIT
