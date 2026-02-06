@@ -1,6 +1,6 @@
 # Retail Retention ML Project
 
-ML-based system for personalized customer retention offers for the «В один клик» e-commerce store.
+ML-based system for personalized customer retention offers for the «В один клик» e-commerce store
 
 ## Goal
 
@@ -44,7 +44,7 @@ pip install -r requirements.txt
 jupyter notebook notebook.ipynb
 ```
 
-Data files (`market_file.csv`, `market_money.csv`, `market_time.csv`, `money.csv`) must be in the project root or in `/datasets/` (notebook checks both).
+Data files (`market_file.csv`, `market_money.csv`, `market_time.csv`, `money.csv`) must be in the project root or in `/datasets/` (notebook checks both)
 
 ## Methods
 
@@ -64,4 +64,4 @@ Data files (`market_file.csv`, `market_money.csv`, `market_time.csv`, `money.csv
 
 ## License
 
-MIT (or as specified in the repository).
+MIT
