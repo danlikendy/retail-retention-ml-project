@@ -1,63 +1,53 @@
-# Retail Retention ML Project
+# Who is cooling off
 
-ML-based system for personalized customer retention offers for the «В один клик» e-commerce store
+E-commerce book: **1 300** customers, four tables (profile, revenue by period, time on site, 3-month profit). Target is purchase activity: **«Снизилась»** vs **«Прежний уровень»** — **38.3% / 61.7%**. The retain team wants who is slipping **and** still worth a coupon.
 
-## Goal
+Live write-up: **[danlikendy.github.io/retail-retention-ml-project](https://danlikendy.github.io/retail-retention-ml-project/)**
 
-- **Classification model** — predict decline in customer purchase activity  
-- **Customer segmentation** — by model outputs and profitability  
-- **Personalized offers** — per segment for retention and profit
+F1 on the decline class is the score I care about. Accuracy on a 62% majority is cheap.
 
-## Repository structure
+---
 
-```
-.
-├── notebook.ipynb      # Full pipeline: EDA, preprocessing, modeling, SHAP, segmentation
-├── market_file.csv     # Main customer data (target: покупательская активность)
-├── market_money.csv    # Revenue by period per customer
-├── market_time.csv     # Time on site by period
-├── money.csv           # Customer profitability (last 3 months)
-├── requirements.txt   # Python dependencies
-└── README.md
-```
+## Problem
 
-## Requirements
+People who still buy on promo, browse few pages, and sat through last month are the ones who drop. After the join you have one row per id. I cut **risk × profit** at the 70th percentile of each — four buckets. The only bucket you actually call is high risk, high profit.
 
-- Python 3.10+
-- Dependencies: see `requirements.txt`
+`GridSearchCV(scoring="f1")` on a **string** target without `pos_label` returns **NaN**. The notebook run that is in git has CV F1 as `nan` for every model, then picks KNN by accident. I do not quote the conclusions cell (LogReg F1 0.845 / AUC 0.906) — that text does not match the printed test cell.
 
-## Setup and run
+## What I shipped
+
+| Piece | Choice |
+|---|---|
+| Target | decline = `Снизилась` |
+| Prep | `ColumnTransformer`: scale nums, OHE cats |
+| Models | kNN, tree, logreg, SVC — GridSearchCV, 5-fold |
+| Hold-out (printed) | **F1 0.794**, **ROC-AUC 0.884**, acc 0.846, rec 0.770 |
+| Segments | 70th pct risk × 70th pct profit |
+| Explain | SHAP on the fitted pipeline |
+
+Pages per visit, category breadth, last-month time on site, promo share, 6-month marketing intensity — that is the SHAP order in the notebook.
+
+## Run
 
 ```bash
-# Clone and enter project
-git clone https://github.com/danlikendy/retail-retention-ml-project.git
-cd retail-retention-ml-project
-
-# Create virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
-
-# Install dependencies
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-
-# Run notebook (Jupyter)
-jupyter notebook notebook.ipynb
+pytest tests/ -q
 ```
 
-Data files (`market_file.csv`, `market_money.csv`, `market_time.csv`, `money.csv`) must be in the project root or in `/datasets/` (notebook checks both)
+Notebook (join → grids → SHAP → buckets): `notebooks/eda_and_training.ipynb`. CSVs sit in the **repo root**. Run the kernel with cwd = root, or the first cell also looks in `/datasets/`.
 
-## Methods
+More: [docs/RUN.md](docs/RUN.md) · [docs/API.md](docs/API.md)
 
-| Area            | Tools / approach                                      |
-|-----------------|--------------------------------------------------------|
-| Data            | pandas, numpy                                         |
-| Visualization   | matplotlib, seaborn                                   |
-| Models          | KNeighborsClassifier, DecisionTreeClassifier, LogisticRegression, SVC (sklearn) |
-| Preprocessing   | ColumnTransformer, Pipeline, StandardScaler, OneHotEncoder |
-| Explainability  | SHAP                                                  |
-| Metrics         | F1-score, ROC-AUC, accuracy, precision, recall         |
+## Layout
 
-## Success criteria
+```
+src/           decline flag, risk×profit segments
+tests/
+notebooks/     full training path
+market_*.csv, money.csv
+```
 
-- Best model: **F1-score ≥ 0.7**, **ROC-AUC ≥ 0.8**
-- Segments with clear, actionable retention offers
+---
+
+Artem Tsygantsov · [tsygantsov.ru](https://tsygantsov.ru) · MIT
