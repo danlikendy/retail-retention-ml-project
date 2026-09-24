@@ -36,3 +36,7 @@ htmlcov/
 
 # mypy
 .mypy_cache/
+
+# Artifacts
+artifacts/
+*.joblib
